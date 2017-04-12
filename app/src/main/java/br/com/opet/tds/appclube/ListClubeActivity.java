@@ -1,5 +1,9 @@
 package br.com.opet.tds.appclube;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -42,6 +47,30 @@ public class ListClubeActivity extends AppCompatActivity {
 
     private class DownloadFromMyAPI extends AsyncTask<Void, Void, String> {
 
+        boolean isConnected = false;
+        ProgressDialog progress;
+        @Override
+        protected void onPreExecute(){
+
+            ConnectivityManager cm =
+                    (ConnectivityManager)ListClubeActivity.this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            isConnected = activeNetwork != null &&
+                    activeNetwork.isConnectedOrConnecting();
+
+            if(isConnected) {
+                progress = new ProgressDialog(ListClubeActivity.this);
+                progress.setMessage("Aguarde o Download dos Dados");
+                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progress.setProgress(0);
+                progress.show();
+            }
+            else{
+                Toast.makeText(ListClubeActivity.this, "Verifique a conexão com a internet...", Toast.LENGTH_SHORT).show();
+            }
+        }
+
         @Override
         protected String doInBackground(Void... params) {
             HttpURLConnection urlConnection = null;
@@ -53,9 +82,6 @@ public class ListClubeActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
-                /*urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.connect();*/
 
                 int test = urlConnection.getResponseCode();
 
@@ -75,12 +101,17 @@ public class ListClubeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            List<Clube> clubes = Util.convertJSONtoClube(s);
-            if(clubes != null){
-                ArrayAdapter<Clube> clubeAdapter = new ClubeAdapter(ListClubeActivity.this,R.layout.clube_item,clubes);
-                ListView listaClube = (ListView) findViewById(R.id.listClubes);
-                listaClube.setAdapter(clubeAdapter);
+            if(isConnected)
+            {
+                List<Clube> clubes = Util.convertJSONtoClube(s);
+                if(clubes != null){
+                    ArrayAdapter<Clube> clubeAdapter = new ClubeAdapter(ListClubeActivity.this,R.layout.clube_item,clubes);
+                    ListView listaClube = (ListView) findViewById(R.id.listClubes);
+                    listaClube.setAdapter(clubeAdapter);
+                }
+                progress.dismiss();
             }
+
         }
     }
 
