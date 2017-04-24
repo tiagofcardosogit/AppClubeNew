@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import java.io.DataOutputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -37,6 +38,7 @@ public class InsertClubeActivity extends Activity {
         clube.setCidade(editCidadeClube.getText().toString());
         clube.setAno(Integer.parseInt(editAnoClube.getText().toString()));
         new UploadToMyAPI().execute(clube);
+
     }
 
     private class UploadToMyAPI extends AsyncTask<Clube, Void, String> {
@@ -67,6 +69,7 @@ public class InsertClubeActivity extends Activity {
                 URL url = new URL("http://webtests.pe.hu/insert.php");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-type", "application/json");
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
 
@@ -76,7 +79,7 @@ public class InsertClubeActivity extends Activity {
                 outputStream.writeBytes(result);
 
                 serverResponseCode = urlConnection.getResponseCode();
-                serverResponseMessage = urlConnection.getResponseMessage();
+                serverResponseMessage = Util.webToString(urlConnection.getInputStream());
 
                 outputStream.flush();
                 outputStream.close();
