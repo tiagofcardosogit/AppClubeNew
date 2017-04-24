@@ -44,6 +44,20 @@ public class Util {
         return localString;
     }
 
+    public static String convertClubetoJSON(Clube clube){
+        JSONObject mainObject = new JSONObject();
+        try {
+            mainObject.put("nome_clube",clube.getNome());
+            mainObject.put("cidade_clube",clube.getCidade());
+            mainObject.put("ano_clube",clube.getAno());
+
+            return mainObject.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static List<Clube> convertJSONtoClube(String jsonFile){
         List<Clube> clubes = new ArrayList<>();
         try {
@@ -67,5 +81,14 @@ public class Util {
             e.printStackTrace();
         }
         return clubes;
+    }
+
+    public static String getStatusFromJSON(String json){
+        try {
+            return new JSONObject(json).getString("status");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

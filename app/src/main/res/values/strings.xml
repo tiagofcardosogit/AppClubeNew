@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">App Clube</string>
     <string name="title_activity_list_clube">ListClubeActivity</string>
+    <string name="hintNomeClube">Nome do Clube</string>
+    <string name="hintCidadeClube">Cidade do Clube</string>
+    <string name="hintAnoClube">Ano de Fundação do Clube</string>
 </resources>

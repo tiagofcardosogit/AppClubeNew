@@ -2,9 +2,12 @@
 
 include ("connect.php");
 
-$nome = "Dougras Clube de Regatas";
-$cidade = "Rio de Janeiro";
-$ano = 2017;
+$data = json_decode(file_get_contents('php://input'), true);
+
+$nome = $data["nome_clube"];
+$cidade = $data["cidade_clube"];
+$ano = $data["ano_clube"];
+
 
 $sql = "INSERT INTO clube (nome_clube, cidade_clube, ano_clube)
 VALUES ('$nome', '$cidade', $ano)";
