@@ -37,30 +37,26 @@ public class InsertClubeActivity extends Activity {
         clube.setNome(editNomeClube.getText().toString());
         clube.setCidade(editCidadeClube.getText().toString());
         clube.setAno(Integer.parseInt(editAnoClube.getText().toString()));
-        new UploadToMyAPI().execute(clube);
+        if(isConnected())
+            new UploadToMyAPI().execute(clube);
+        else
+            Toast.makeText(this, "Verifique a conexão com a internet...", Toast.LENGTH_SHORT).show();
+    }
 
+    private boolean isConnected(){
+        ConnectivityManager cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 
     private class UploadToMyAPI extends AsyncTask<Clube, Void, String> {
 
-        boolean isConnected = false;
         ProgressDialog progress;
         int serverResponseCode;
         String serverResponseMessage;
-        @Override
-        protected void onPreExecute(){
-
-            ConnectivityManager cm =
-                    (ConnectivityManager)InsertClubeActivity.this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            isConnected = activeNetwork != null &&
-                    activeNetwork.isConnectedOrConnecting();
-
-            if(!isConnected) {
-                Toast.makeText(InsertClubeActivity.this, "Verifique a conexão com a internet...", Toast.LENGTH_SHORT).show();
-            }
-        }
 
         @Override
         protected String doInBackground(Clube... params) {
@@ -98,18 +94,14 @@ public class InsertClubeActivity extends Activity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            if(isConnected)
-            {
-                Intent listaClube = null;
-                if(Util.getStatusFromJSON(serverResponseMessage).equals("1")) {
-                    Toast.makeText(InsertClubeActivity.this, "Clube registrado no Sistema!", Toast.LENGTH_SHORT).show();
-                    listaClube = new Intent(InsertClubeActivity.this, ListClubeActivity.class);
-                    startActivity(listaClube);
-                }else{
-                    Toast.makeText(InsertClubeActivity.this, "Falha ao cadastrar o clube.", Toast.LENGTH_SHORT).show();
-                }
+            Intent listaClube = null;
+            if(Util.getStatusFromJSON(serverResponseMessage).equals("1")) {
+                Toast.makeText(InsertClubeActivity.this, "Clube registrado no Sistema!", Toast.LENGTH_SHORT).show();
+                listaClube = new Intent(InsertClubeActivity.this, ListClubeActivity.class);
+                startActivity(listaClube);
+            }else{
+                Toast.makeText(InsertClubeActivity.this, "Falha ao cadastrar o clube.", Toast.LENGTH_SHORT).show();
             }
-
         }
     }
 }

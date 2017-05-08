@@ -45,33 +45,32 @@ public class ListClubeActivity extends AppCompatActivity {
     }
 
     public void loadClubes(){
-        new DownloadFromMyAPI().execute();
+        if(isConnected())
+            new DownloadFromMyAPI().execute();
+        else
+            Toast.makeText(this, "Verifique a conexão com a internet...", Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isConnected(){
+        ConnectivityManager cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 
     private class DownloadFromMyAPI extends AsyncTask<Void, Void, String> {
-
-        boolean isConnected = false;
         ProgressDialog progress;
         @Override
         protected void onPreExecute(){
 
-            ConnectivityManager cm =
-                    (ConnectivityManager)ListClubeActivity.this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            progress = new ProgressDialog(ListClubeActivity.this);
+            progress.setMessage("Aguarde o Download dos Dados");
+            progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progress.setProgress(0);
+            progress.show();
 
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            isConnected = activeNetwork != null &&
-                    activeNetwork.isConnectedOrConnecting();
-
-            if(isConnected) {
-                progress = new ProgressDialog(ListClubeActivity.this);
-                progress.setMessage("Aguarde o Download dos Dados");
-                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progress.setProgress(0);
-                progress.show();
-            }
-            else{
-                Toast.makeText(ListClubeActivity.this, "Verifique a conexão com a internet...", Toast.LENGTH_SHORT).show();
-            }
         }
 
         @Override
@@ -104,8 +103,6 @@ public class ListClubeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            if(isConnected)
-            {
                 List<Clube> clubes = Util.convertJSONtoClube(s);
                 if(clubes != null){
                     ArrayAdapter<Clube> clubeAdapter = new ClubeAdapter(ListClubeActivity.this,R.layout.clube_item,clubes);
@@ -113,8 +110,6 @@ public class ListClubeActivity extends AppCompatActivity {
                     listaClube.setAdapter(clubeAdapter);
                 }
                 progress.dismiss();
-            }
-
         }
     }
 
